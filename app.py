@@ -11596,6 +11596,21 @@ def pet_reminders(pet_id):
                            )
 
 
+
+# =========================
+# AUTO INIT (SERVERLESS SAFE)
+# =========================
+# Vercel imports this module but does not execute `main()`. We must initialize templates/storage at import-time.
+# This is safe because we write into a temp/writable directory on Vercel.
+try:
+    write_templates()
+    init_storage()
+except Exception as _e:
+    try:
+        logger.exception("Startup init failed: %s", _e)
+    except Exception:
+        pass
+
 # =========================
 # STARTUP
 # =========================
@@ -11605,7 +11620,7 @@ def main():
     if "--seed" in sys.argv:
         seed_demo_data(10)
         print("Seeded demo data (only if files were empty).")
-    app.run(debug=True)
+    app.run(debug=(os.environ.get('FLASK_DEBUG')=='1'))
 
 
 if __name__ == "__main__":
